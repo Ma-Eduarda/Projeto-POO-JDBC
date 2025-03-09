@@ -7,10 +7,11 @@ import java.awt.event.ActionEvent;
 import java.util.List;
 
 public class TelaEstoque extends JFrame {
+
     private final ProdutoDAO produtoDAO = new ProdutoDAO();
     private final DefaultTableModel modelo = new DefaultTableModel();
     private final JTable tabelaProdutos = new JTable(modelo);
- 
+
     public TelaEstoque() {
         setTitle("Gerenciamento de Estoque");
         setSize(800, 400);
@@ -46,7 +47,8 @@ public class TelaEstoque extends JFrame {
         modelo.setRowCount(0);
         List<Produto> produtos = produtoDAO.listarProdutos();
         for (Produto p : produtos) {
-            modelo.addRow(new Object[]{p.getId(), p.getNome(), String.format("%.2f", p.getPreco()), p.getQtdEstoque(), p.getDescricao()});
+            modelo.addRow(new Object[]{p.getId(), p.getNome(), String.format(java.util.Locale.US, "%.2f", p.getPreco()), p.getQtdEstoque(), p.getDescricao()
+            });
         }
     }
 
