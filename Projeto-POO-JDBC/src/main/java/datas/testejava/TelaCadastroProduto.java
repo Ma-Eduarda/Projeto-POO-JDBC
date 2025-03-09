@@ -1,11 +1,7 @@
 package datas.testejava;
 
-import datas.testejava.Produto;
-import datas.testejava.ProdutoDAO;
-
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 
 public class TelaCadastroProduto extends JFrame {
     private final JTextField txtNome = new JTextField(20);
@@ -17,7 +13,7 @@ public class TelaCadastroProduto extends JFrame {
     public TelaCadastroProduto(TelaEstoque telaEstoque) {
         setTitle("Adicionar Produto");
         setSize(350, 250);
-        setLocationRelativeTo(null); // Centraliza a janela
+        setLocationRelativeTo(null); 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new GridBagLayout());
 
@@ -25,19 +21,19 @@ public class TelaCadastroProduto extends JFrame {
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.WEST;
 
-        // Campos do formulário
+      
         addLabelAndField("Nome:", txtNome, gbc, 0);
         addLabelAndField("Preço:", txtPreco, gbc, 1);
         addLabelAndField("Quantidade:", txtQuantidade, gbc, 2);
         addLabelAndField("Descrição:", new JScrollPane(txtDescricao), gbc, 3);
 
-        // Botões
+        
         JPanel panelButtons = new JPanel();
         JButton btnAdicionar = new JButton("Adicionar");
         JButton btnSair = new JButton("Sair");
 
         btnAdicionar.addActionListener(e -> adicionarProduto(telaEstoque));
-        btnSair.addActionListener(e -> dispose()); // Fecha a tela
+        btnSair.addActionListener(e -> dispose()); 
 
         panelButtons.add(btnAdicionar);
         panelButtons.add(btnSair);
@@ -70,8 +66,8 @@ public class TelaCadastroProduto extends JFrame {
             produtoDAO.adicionarProduto(new Produto(0, nome, preco, quantidade, descricao));
             JOptionPane.showMessageDialog(this, "Produto adicionado com sucesso!");
 
-            telaEstoque.carregarProdutos(); // Atualiza a lista na tela principal
-            dispose(); // Fecha a tela
+            telaEstoque.carregarProdutos(); 
+            dispose(); 
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Erro: Preço e Quantidade devem ser números válidos!", "Erro", JOptionPane.ERROR_MESSAGE);
         } catch (IllegalArgumentException ex) {
