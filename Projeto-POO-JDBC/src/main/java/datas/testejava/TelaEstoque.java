@@ -1,86 +1,86 @@
 package datas.testejava;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.List;
 
-public class TelaEditarProduto extends JFrame {
-    private final JTextField txtNome = new JTextField(20);
-    private final JTextField txtPreco = new JTextField(10);
-    private final JTextField txtQuantidade = new JTextField(5);
-    private final JTextArea txtDescricao = new JTextArea(3, 20);
+public class TelaEstoque extends JFrame {
     private final ProdutoDAO produtoDAO = new ProdutoDAO();
-    private final int produtoId;
-    private final TelaEstoque telaEstoque;
+    private final DefaultTableModel modelo = new DefaultTableModel();
+    private final JTable tabelaProdutos = new JTable(modelo);
+ 
+    public TelaEstoque() {
+        setTitle("Gerenciamento de Estoque");
+        setSize(800, 400);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
 
-    public TelaEditarProduto(TelaEstoque telaEstoque, int id, String nome, double preco, int quantidade, String descricao) {
-        this.produtoId = id;
-        this.telaEstoque = telaEstoque;
+        modelo.addColumn("ID");
+        modelo.addColumn("Nome");
+        modelo.addColumn("Preço");
+        modelo.addColumn("Quantidade");
+        modelo.addColumn("Descrição");
+        carregarProdutos();
 
-        setTitle("Editar Produto");
-        setSize(350, 250);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLayout(new GridBagLayout());
+        JScrollPane scrollPane = new JScrollPane(tabelaProdutos);
+        add(scrollPane, BorderLayout.CENTER);
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
-        gbc.anchor = GridBagConstraints.WEST;
+        JPanel painelBotoes = new JPanel();
+        JButton btnAdicionar = new JButton("Adicionar Produto");
+        JButton btnEditar = new JButton("Editar Produto");
+        JButton btnExcluir = new JButton("Excluir Produto");
 
-        txtNome.setText(nome);
-        txtPreco.setText(String.valueOf(preco));
-        txtQuantidade.setText(String.valueOf(quantidade));
-        txtDescricao.setText(descricao);
+        btnAdicionar.addActionListener(this::abrirTelaCadastro);
+        btnEditar.addActionListener(this::abrirTelaEdicao);
+        btnExcluir.addActionListener(this::excluirProduto);
 
-        addLabelAndField("Nome:", txtNome, gbc, 0);
-        addLabelAndField("Preço:", txtPreco, gbc, 1);
-        addLabelAndField("Quantidade:", txtQuantidade, gbc, 2);
-        addLabelAndField("Descrição:", new JScrollPane(txtDescricao), gbc, 3);
-
-        JPanel panelButtons = new JPanel();
-        JButton btnSalvar = new JButton("Salvar");
-        JButton btnCancelar = new JButton("Cancelar");
-
-        btnSalvar.addActionListener(this::salvarEdicao);
-        btnCancelar.addActionListener(e -> dispose());
-
-        panelButtons.add(btnSalvar);
-        panelButtons.add(btnCancelar);
-
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-        gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.CENTER;
-        add(panelButtons, gbc);
+        painelBotoes.add(btnAdicionar);
+        painelBotoes.add(btnEditar);
+        painelBotoes.add(btnExcluir);
+        add(painelBotoes, BorderLayout.SOUTH);
     }
 
-    private void addLabelAndField(String label, Component field, GridBagConstraints gbc, int y) {
-        gbc.gridx = 0;
-        gbc.gridy = y;
-        add(new JLabel(label), gbc);
-
-        gbc.gridx = 1;
-        add(field, gbc);
-    }
-
-    private void salvarEdicao(ActionEvent e) {
-        try {
-            String nome = txtNome.getText().trim();
-            if (nome.isEmpty()) throw new IllegalArgumentException("O nome não pode estar vazio!");
-
-            double preco = Double.parseDouble(txtPreco.getText().trim());
-            int quantidade = Integer.parseInt(txtQuantidade.getText().trim());
-            String descricao = txtDescricao.getText().trim();
-
-            produtoDAO.atualizarProduto(new Produto(produtoId, nome, preco, quantidade, descricao));
-            JOptionPane.showMessageDialog(this, "Produto atualizado com sucesso!");
-
-            telaEstoque.carregarProdutos();
-            dispose();
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Erro: Preço e Quantidade devem ser números válidos!", "Erro", JOptionPane.ERROR_MESSAGE);
-        } catch (IllegalArgumentException ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+    public void carregarProdutos() {
+        modelo.setRowCount(0);
+        List<Produto> produtos = produtoDAO.listarProdutos();
+        for (Produto p : produtos) {
+            modelo.addRow(new Object[]{p.getId(), p.getNome(), String.format("%.2f", p.getPreco()), p.getQtdEstoque(), p.getDescricao()});
         }
+    }
+
+    private void abrirTelaCadastro(ActionEvent e) {
+        new TelaCadastroProduto(this).setVisible(true);
+    }
+
+    private void abrirTelaEdicao(ActionEvent e) {
+        int linha = tabelaProdutos.getSelectedRow();
+        if (linha == -1) {
+            JOptionPane.showMessageDialog(this, "Selecione um produto para editar.");
+            return;
+        }
+        int id = (int) modelo.getValueAt(linha, 0);
+        String nome = (String) modelo.getValueAt(linha, 1);
+        double preco = Double.parseDouble(modelo.getValueAt(linha, 2).toString().replace(",", "."));
+        int qtd = (int) modelo.getValueAt(linha, 3);
+        String descricao = (String) modelo.getValueAt(linha, 4);
+
+        new TelaEditarProduto(this, id, nome, preco, qtd, descricao).setVisible(true);
+    }
+
+    private void excluirProduto(ActionEvent e) {
+        int linha = tabelaProdutos.getSelectedRow();
+        if (linha == -1) {
+            JOptionPane.showMessageDialog(this, "Selecione um produto para excluir.");
+            return;
+        }
+        int id = (int) modelo.getValueAt(linha, 0);
+        produtoDAO.excluirProduto(id);
+        carregarProdutos();
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new TelaEstoque().setVisible(true));
     }
 }
