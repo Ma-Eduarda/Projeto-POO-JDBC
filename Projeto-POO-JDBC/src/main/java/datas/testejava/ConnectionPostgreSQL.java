@@ -44,3 +44,14 @@ public class ConnectionPostgreSQL {
         }
     }
 }
+
+
+/*
+CREATE TABLE produto (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100),
+    preco DECIMAL(10, 2),
+    quantidade_estoque INT,
+    descricao TEXT
+);
+*/
